@@ -364,13 +364,79 @@
 // export default ThreeScene;
 
 
-"use client";
-import { Canvas, useThree } from "@react-three/fiber";
-import { useGLTF, OrbitControls, Environment } from "@react-three/drei";
-import { useRef, useEffect } from "react";
-import { ReinhardToneMapping, MeshStandardMaterial } from "three";
+// "use client";
+// import { Canvas, useThree } from "@react-three/fiber";
+// import { useGLTF, OrbitControls, Environment } from "@react-three/drei";
+// import { useRef, useEffect } from "react";
+// import { ReinhardToneMapping, MeshStandardMaterial } from "three";
 
-const Model = ({ url }) => {
+// const Model = ({ url }) => {
+//   const { scene } = useGLTF(url);
+//   const ref = useRef();
+
+//   useEffect(() => {
+//     if (ref.current) {
+//       ref.current.traverse((child) => {
+//         if (child.isMesh) {
+//           const originalMaterial = child.material;
+
+//           // Create a new material if needed, or modify the existing one
+//           if (originalMaterial instanceof MeshStandardMaterial) {
+//             if (child.name.includes("Ring")) {
+//               // Adjust materials for rings
+//               originalMaterial.metalness = 0.3;  // Reduce metallic look
+//               originalMaterial.roughness = 0.4;  // Adjust roughness for appearance
+//             } else if (child.name.includes("Diamond")) {
+//               // Adjust materials for diamonds
+//               originalMaterial.metalness = 0;  // No metalness for diamonds
+//               originalMaterial.roughness = 0.8; // Higher roughness
+//               originalMaterial.transparent = false; // Ensure the diamond is not transparent
+//               originalMaterial.opacity = 1; // Full opacity
+//             }
+
+//             originalMaterial.needsUpdate = true; // Update the material
+//           }
+//         }
+//       });
+//     }
+//   }, [scene]); // Dependency on scene to ensure effect runs after model loads
+
+//   return <primitive object={scene} ref={ref} />;
+// };
+
+// const SetToneMapping = () => {
+//   const { gl } = useThree();
+
+//   useEffect(() => {
+//     gl.toneMapping = ReinhardToneMapping;
+//     gl.toneMappingExposure = 1; // Adjust exposure for realistic rendering
+//   }, [gl]);
+
+//   return null;
+// };
+
+// const ThreeScene = ({ modelUrl }) => {
+//   return (
+//     <Canvas>
+//       <Model url={modelUrl} />
+//       <OrbitControls />
+//       <SetToneMapping />
+//       {/* <Background url={"/background.png"} /> */}
+//       <Environment preset="apartment" /> {/* Use appropriate environment preset */}
+//     </Canvas>
+//   );
+// };
+
+// export default ThreeScene;
+
+
+"use client";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { useGLTF, OrbitControls, Environment } from "@react-three/drei";
+import { useRef, useEffect, useState } from "react";
+import { ReinhardToneMapping, MeshStandardMaterial, Vector3 } from "three";
+
+const Model = ({ url, onLoad }) => {
   const { scene } = useGLTF(url);
   const ref = useRef();
 
@@ -380,7 +446,6 @@ const Model = ({ url }) => {
         if (child.isMesh) {
           const originalMaterial = child.material;
 
-          // Create a new material if needed, or modify the existing one
           if (originalMaterial instanceof MeshStandardMaterial) {
             if (child.name.includes("Ring")) {
               // Adjust materials for rings
@@ -399,7 +464,10 @@ const Model = ({ url }) => {
         }
       });
     }
-  }, [scene]); // Dependency on scene to ensure effect runs after model loads
+    if (onLoad) {
+      onLoad(scene); // Notify parent when the model is loaded
+    }
+  }, [scene, onLoad]);
 
   return <primitive object={scene} ref={ref} />;
 };
@@ -415,14 +483,54 @@ const SetToneMapping = () => {
   return null;
 };
 
-const ThreeScene = ({ modelUrl }) => {
+const CameraRig = ({ cameraZoom }) => {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    if (cameraZoom) {
+      camera.position.set(cameraZoom.position.x, cameraZoom.position.y, cameraZoom.position.z);
+      camera.lookAt(new Vector3(0, 0, 0));
+    }
+  }, [cameraZoom, camera]);
+
+  return null;
+};
+
+const ThreeScene = ({ modelUrl, backgroundUrl, cameraZoom }) => {
   return (
-    <Canvas>
-      <Model url={modelUrl} />
-      <OrbitControls />
-      <SetToneMapping />
-      <Environment preset="apartment" /> {/* Use appropriate environment preset */}
-    </Canvas>
+    <div className="three-scene-wrapper">
+      <div
+        className="blurred-background"
+        style={{
+          backgroundImage: `url(${backgroundUrl})`,
+          filter: "blur(5px)", // Adjust the blur intensity here
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: -1, // Ensure the background is behind the canvas
+          overflow: "hidden",
+        }}
+      />
+
+      <div className="three-scene-container">
+        <Canvas>
+          <Model 
+            url={modelUrl} 
+            onLoad={(scene) => {
+              // Handle post-load actions if needed
+            }} 
+          />
+          <CameraRig cameraZoom={cameraZoom} />
+          <OrbitControls />
+          <SetToneMapping />
+          <Environment preset="apartment" />
+        </Canvas>
+      </div>
+    </div>
   );
 };
 
