@@ -21,12 +21,12 @@ export default function Home() {
         <ThreeScene
           modelUrl={"/sample5.glb"}
           backgroundUrl = "/background.png"
-          cameraZoom={{ position: { x: 0, y: 0, z: 10 } }} // Adjust zoom level here
+          
         />
         <ThreeScene
           modelUrl={"/sample7.glb"}
           backgroundUrl = "/background.png"
-          cameraZoom={{ position: { x: 0, y: 0, z: 10 } }} // Adjust zoom level here
+          
         />
       </main>
     </>

@@ -192,10 +192,8 @@ const Model = ({ url }) => {
     if (ref.current) {
       ref.current.traverse((child) => {
         if (child.isMesh) {
-          // Ensure we do not modify the material unless absolutely necessary
           const originalMaterial = child.material;
 
-          // If the object looks incorrect, adjust only what is needed:
           if (originalMaterial.metalness !== undefined) {
             originalMaterial.metalness = originalMaterial.metalness; // Use original metalness
           }
@@ -203,7 +201,6 @@ const Model = ({ url }) => {
             originalMaterial.roughness = originalMaterial.roughness; // Use original roughness
           }
 
-          // Set transparency to false if objects are becoming transparent unintentionally
           if (originalMaterial.transparent) {
             originalMaterial.transparent = false;
           }
@@ -228,14 +225,22 @@ const SetToneMapping = () => {
   return null;
 };
 
-const ThreeScene = ({ modelUrl }) => {
+const ThreeScene = ({ modelUrl, backgroundUrl }) => {
   return (
-    <Canvas>
-      <Model url={modelUrl} />
-      <OrbitControls />
-      <SetToneMapping />
-      <Environment preset="apartment" /> {/* "sunset" provides a warmer light, which can enhance metallic surfaces */}
-    </Canvas>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <Canvas
+        style={{
+          backgroundImage: `url(${backgroundUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <Model url={modelUrl} />
+        <OrbitControls />
+        <SetToneMapping />
+        <Environment preset="apartment" />
+      </Canvas>
+    </div>
   );
 };
 
