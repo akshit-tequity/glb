@@ -13,9 +13,9 @@ export default function Home() {
       </Head>
       <main
         style={{
-          width: "90%",
+          width: "100%",
           height: "100vh",
-          margin:"auto"
+          // margin:"auto"
         }}
       >
         <ThreeScene
@@ -23,11 +23,11 @@ export default function Home() {
           backgroundUrl = "/background.png"
           
         />
-        <ThreeScene
+        {/* <ThreeScene
           modelUrl={"/sample7.glb"}
           backgroundUrl = "/background.png"
           
-        />
+        /> */}
       </main>
     </>
   );
